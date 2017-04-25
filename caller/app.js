@@ -16,7 +16,7 @@ var router = express.Router();
 var app = express();
 
 var configuration = JSON.parse(
-    fs.readFileSync("config.json")
+    fs.readFileSync("caller/config.json")
 );
 
 var options = {
@@ -78,18 +78,12 @@ callback = function (response) {
     });
 
     response.on('end', function () {
-            var parser = new xml2js.Parser();
-            parser.parseString(str, function (err, result) {
+                var parser = new xml2js.Parser();
+                var r = /\d+/g;
                 packet = {
                     edge: {
                         ip: configuration.edge_address,
-                        uptime: result.rtmp.uptime[0],
-                        accepted: result.rtmp.naccepted[0],
-                        bandwidth_in: result.rtmp.bw_in[0],
-                        total_traffic_in: result.rtmp.bytes_in[0],
-                        bandwidth_out: result.rtmp.bw_out[0],
-                        total_traffic_out: result.rtmp.bytes_out[0],
-                        clients: result.rtmp.server[0].application[0].live[0].nclients[0]
+                        clients: str.match(r)[0]
                     },
                     security: {
                         key: configuration.load_balancer_key
@@ -98,7 +92,7 @@ callback = function (response) {
 
                 //send update packet containing the edge object
                 ioClient.emit('sendserver', packet);
-            });
+       
 
 
         }
